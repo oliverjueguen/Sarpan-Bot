@@ -8,26 +8,19 @@ app.post('/payload', (req, res) => {
   const payload = req.body;
   console.log('Solicitud recibida:', payload);
 
-  // Verifica que el evento sea un push
-  if (payload.ref) {
-    console.log('Evento push detectado. Ejecutando git pull...');
-    exec('cd /home/ubuntu/SarpanBot && git pull', (error, stdout, stderr) => {
-      if (error) {
-        console.error(`Error ejecutando git pull: ${error}`);
-        return res.sendStatus(500);
-      }
-      console.log(`git pull ejecutado con éxito. stdout: ${stdout}`);
-      console.error(`stderr: ${stderr}`);
-      res.sendStatus(200);
-    });
-  } else {
-    console.log('Evento no relevante, no se ejecuta git pull.');
+  // Ejecuta git pull para cualquier evento push
+  console.log('Evento push detectado. Ejecutando git pull...');
+  exec('cd /home/ubuntu/SarpanBot && git pull', (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Error ejecutando git pull: ${error}`);
+      return res.sendStatus(500);
+    }
+    console.log(`git pull ejecutado con éxito. stdout: ${stdout}`);
+    console.error(`stderr: ${stderr}`);
     res.sendStatus(200);
-  }
+  });
 });
 
 app.listen(3000, () => {
   console.log('Servidor escuchando en el puerto 3000');
 });
-
-// Webhook pull test2
