@@ -61,3 +61,6 @@ build/
 # Archivos de logs
 *.log
 logs/
+
+# Python dependencies
+requirements.txt
