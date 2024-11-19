@@ -74,12 +74,18 @@ handleVoiceStateUpdate(client);
 // Usar el manejador de eventos de eliminación de mensajes
 handleMessageDelete(client);
 
+// Definir la variable nextNightTime antes de usarla
+let nextNightTime;
+
 // Programar notificación de audio 5 minutos antes de las noches
 const textChannelId = '1305310810007928945'; // Reemplaza con el ID del canal de texto
 const voiceChannelId = '1300875878481268824'; // Reemplaza con el ID del canal de voz
 const roleId = '1305310749949693955'; // Reemplaza con el ID del rol
 
-const nextNightTime = scheduleNightNotifications(client, textChannelId, voiceChannelId, roleId);
+nextNightTime = scheduleNightNotifications(client, textChannelId, voiceChannelId, roleId);
+
+// Uso de nextNightTime
+console.log(nextNightTime);
 
 // Programar notificación de audio 5 minutos antes de los eventos
 const baseDate = new Date('2024-11-18T03:00:00');
