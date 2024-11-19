@@ -1,6 +1,17 @@
 {
+  "name": "sarpanbot",
+  "version": "1.0.0",
+  "description": "Discord Bot for Sarpan Guild",
+  "main": "sarpanbot.js",
+  "scripts": {
+    "start": "node sarpanbot.js"
+  },
+  "author": "Turbonugget",
+  "license": "MIT",
   "dependencies": {
+    "@discordjs/voice": "^0.18.0",
     "discord.js": "^14.16.3",
-    "node-cron": "^3.0.3"
+    "dotenv": "^16.4.5",
+    "node-schedule": "^2.1.1"
   }
 }

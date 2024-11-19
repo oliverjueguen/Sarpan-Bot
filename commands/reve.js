@@ -1,0 +1,18 @@
+const playAudio = require('../playAudio');
+
+module.exports = {
+    name: 'reve',
+    description: 'Reproduce el audio reve.mp3 en un canal de voz y se desconecta después de 5 segundos.',
+    async execute(message) {
+        const voiceChannelId = '1300875878481268824'; // ID del canal de voz
+        const audioFilePath = 'sounds/reve.mp3'; // Ruta del archivo de audio
+
+        try {
+            await playAudio(message.client, voiceChannelId, audioFilePath);
+            message.reply('Reproduciendo audio reve en el canal de voz.');
+        } catch (error) {
+            console.error(error);
+            message.reply('Hubo un error al intentar reproducir el audio reve.');
+        }
+    },
+};
