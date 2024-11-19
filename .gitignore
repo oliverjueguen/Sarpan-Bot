@@ -24,3 +24,40 @@ yarn-error.log*
 .idea/
 *.sublime-workspace
 *.sublime-project
+
+# Archivos generados por el sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos generados por el entorno de desarrollo
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Dependencias y paquetes instalados
+node_modules/
+vendor/
+*.jar
+*.war
+*.ear
+
+# Archivos de configuración específicos del entorno
+.env
+*.local
+
+# Archivos de compilación y binarios
+dist/
+build/
+*.out
+*.o
+*.class
+*.dll
+*.exe
+*.so
+
+# Archivos de logs
+*.log
+logs/
