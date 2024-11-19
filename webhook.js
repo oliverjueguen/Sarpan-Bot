@@ -9,8 +9,8 @@ app.post('/payload', (req, res) => {
   console.log('Solicitud recibida:', payload);
 
   // Verifica que el evento sea un push
-  if (payload.ref === 'refs/heads/main') { // Cambia 'main' por la rama que usas
-    console.log('Evento push detectado en la rama main. Ejecutando git pull...');
+  if (payload.ref) {
+    console.log('Evento push detectado. Ejecutando git pull...');
     exec('cd /home/ubuntu/SarpanBot && git pull', (error, stdout, stderr) => {
       if (error) {
         console.error(`Error ejecutando git pull: ${error}`);
