@@ -3,6 +3,8 @@ const dotenv = require('dotenv');
 const fs = require('fs');
 const path = require('path');
 const schedule = require('node-schedule');
+const { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus, VoiceConnectionStatus } = require('@discordjs/voice');
+const { Wit, log } = require('node-wit');
 const { scheduleNightNotifications } = require('./utils/scheduleNight');
 const ScheduleManager = require('./utils/scheduleManager');
 const handleVoiceStateUpdate = require('./voiceStateHandler');
@@ -13,6 +15,7 @@ const updateServerStats = require('./utils/updateServerStats');
 dotenv.config();
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
+const witClient = new Wit({ accessToken: process.env.WIT_AI_TOKEN });
 
 client.commands = new Collection();
 
@@ -129,3 +132,49 @@ events.forEach(event => {
 });
 
 client.login(process.env.TOKEN);
+
+// Función para manejar comandos de voz
+async function handleVoiceCommand(connection) {
+  const receiver = connection.receiver;
+  const audioPlayer = createAudioPlayer();
+
+  receiver.speaking.on('start', userId => {
+    const audioStream = receiver.subscribe(userId, {
+      end: {
+        behavior: EndBehaviorType.AfterSilence,
+        duration: 100,
+      },
+    });
+
+    const audioResource = createAudioResource(audioStream);
+    audioPlayer.play(audioResource);
+
+    audioPlayer.on(AudioPlayerStatus.Playing, () => {
+      console.log('Audio recibido, procesando...');
+    });
+
+    audioPlayer.on(AudioPlayerStatus.Idle, async () => {
+      const buffer = [];
+      audioStream.on('data', chunk => buffer.push(chunk));
+      audioStream.on('end', async () => {
+        const audioBuffer = Buffer.concat(buffer);
+        const response = await witClient.message(audioBuffer.toString('base64'), {});
+        console.log('Respuesta de Wit.ai:', response);
+
+        // Manejar la respuesta de Wit.ai y ejecutar comandos
+        if (response.intents.length > 0) {
+          const intent = response.intents[0].name;
+          if (intent === 'join') {
+            // Ejecutar comando join
+            const command = client.commands.get('join');
+            if (command) command.execute({ member: { voice: { channel: connection.channel } }, reply: console.log });
+          } else if (intent === 'leave') {
+            // Ejecutar comando leave
+            const command = client.commands.get('leave');
+            if (command) command.execute({ guild: connection.channel.guild, reply: console.log });
+          }
+        }
+      });
+    });
+  });
+}
