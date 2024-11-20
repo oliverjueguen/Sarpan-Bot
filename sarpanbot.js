@@ -3,8 +3,8 @@ const dotenv = require('dotenv');
 const fs = require('fs');
 const path = require('path');
 const schedule = require('node-schedule');
-const { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus, VoiceConnectionStatus } = require('@discordjs/voice');
-const { Wit, log } = require('node-wit');
+const { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus, VoiceConnectionStatus, EndBehaviorType } = require('@discordjs/voice');
+const { Wit } = require('node-wit');
 const { scheduleNightNotifications } = require('./utils/scheduleNight');
 const ScheduleManager = require('./utils/scheduleManager');
 const handleVoiceStateUpdate = require('./voiceStateHandler');
@@ -74,7 +74,7 @@ client.on('messageCreate', async message => {
 client.on('error', console.error);
 client.on('disconnect', () => {
   console.log('Bot desconectado, intentando reconectar...');
-  client.login(process.env.TOKEN);
+  client.login(process.env.DISCORD_TOKEN);
 });
 client.on('reconnecting', () => {
   console.log('Bot reconectando...');
@@ -131,7 +131,7 @@ events.forEach(event => {
     });
 });
 
-client.login(process.env.TOKEN);
+client.login(process.env.DISCORD_TOKEN);
 
 // Función para manejar comandos de voz
 async function handleVoiceCommand(connection) {
@@ -146,35 +146,22 @@ async function handleVoiceCommand(connection) {
       },
     });
 
-    const audioResource = createAudioResource(audioStream);
-    audioPlayer.play(audioResource);
+    const buffer = [];
+    audioStream.on('data', chunk => buffer.push(chunk));
+    audioStream.on('end', async () => {
+      const audioBuffer = Buffer.concat(buffer);
+      const response = await witClient.message(audioBuffer.toString('base64'), {});
+      console.log('Respuesta de Wit.ai:', response);
 
-    audioPlayer.on(AudioPlayerStatus.Playing, () => {
-      console.log('Audio recibido, procesando...');
-    });
-
-    audioPlayer.on(AudioPlayerStatus.Idle, async () => {
-      const buffer = [];
-      audioStream.on('data', chunk => buffer.push(chunk));
-      audioStream.on('end', async () => {
-        const audioBuffer = Buffer.concat(buffer);
-        const response = await witClient.message(audioBuffer.toString('base64'), {});
-        console.log('Respuesta de Wit.ai:', response);
-
-        // Manejar la respuesta de Wit.ai y ejecutar comandos
-        if (response.intents.length > 0) {
-          const intent = response.intents[0].name;
-          if (intent === 'join') {
-            // Ejecutar comando join
-            const command = client.commands.get('join');
-            if (command) command.execute({ member: { voice: { channel: connection.channel } }, reply: console.log });
-          } else if (intent === 'leave') {
-            // Ejecutar comando leave
-            const command = client.commands.get('leave');
-            if (command) command.execute({ guild: connection.channel.guild, reply: console.log });
-          }
+      // Manejar la respuesta de Wit.ai y ejecutar comandos
+      if (response.intents.length > 0) {
+        const intent = response.intents[0].name;
+        if (intent === 'leave') {
+          // Ejecutar comando leave
+          const command = client.commands.get('leave');
+          if (command) command.execute({ guild: connection.channel.guild, reply: console.log });
         }
-      });
+      }
     });
   });
 }
