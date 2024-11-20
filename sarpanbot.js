@@ -49,7 +49,7 @@ client.once('ready', () => {
       });
 
       // Ejecutar comandos de voz
-      const voiceCommand = client.commands.get('voiceCommands');
+      const voiceCommand = client.commands.get('voiceTest');
       if (voiceCommand) {
         voiceCommand.execute(connection, client);
       }
