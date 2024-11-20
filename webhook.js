@@ -10,7 +10,7 @@ app.post('/payload', (req, res) => {
 
   // Ejecuta git pull para cualquier evento push
   console.log('Evento push detectado. Ejecutando git pull...');
-  exec('cd /home/ubuntu/SarpanBot && git pull', (error, stdout, stderr) => {
+  exec('cd /home/debian/sarpanbot && git pull', (error, stdout, stderr) => {
     if (error) {
       console.error(`Error ejecutando git pull: ${error}`);
       return res.sendStatus(500);
