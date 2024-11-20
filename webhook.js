@@ -13,6 +13,7 @@ app.post('/payload', (req, res) => {
   exec('cd /home/debian/sarpanbot && git pull', (error, stdout, stderr) => {
     if (error) {
       console.error(`Error ejecutando git pull: ${error}`);
+      console.error(`stderr: ${stderr}`);
       return res.sendStatus(500);
     }
     console.log(`git pull ejecutado con éxito. stdout: ${stdout}`);
@@ -24,6 +25,3 @@ app.post('/payload', (req, res) => {
 app.listen(3000, () => {
   console.log('Servidor escuchando en el puerto 3000');
 });
-
-
-// Test 2
