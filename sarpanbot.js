@@ -1,5 +1,5 @@
-require('dotenv').config();
-const { Client, Collection, GatewayIntentBits } = require('discord.js');
+const { Client, GatewayIntentBits, Collection } = require('discord.js');
+const dotenv = require('dotenv');
 const fs = require('fs');
 const path = require('path');
 const schedule = require('node-schedule');
@@ -10,63 +10,78 @@ const handleMessageDelete = require('./messageDeleteHandler');
 const playAudio = require('./playAudio');
 const updateServerStats = require('./utils/updateServerStats');
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildPresences] });
+dotenv.config();
 
-// Configuración de colección de comandos
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
+
 client.commands = new Collection();
+
+// Cargar comandos desde la carpeta commands
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
 for (const file of commandFiles) {
-    const command = require(path.join(commandsPath, file));
-    client.commands.set(command.name, command);
+  const filePath = path.join(commandsPath, file);
+  const command = require(filePath);
+  client.commands.set(command.name, command);
 }
 
-// Evento para manejar comandos
-client.on('messageCreate', message => {
-    if (!message.content.startsWith('!') || message.author.bot) return;
+client.once('ready', () => {
+  console.log(`Logged in as ${client.user.tag}!`);
+  updateServerStats(client, '1300875878481268820'); // Reemplaza con el ID de tu servidor
 
-    const args = message.content.slice(1).trim().split(/ +/);
-    const commandName = args.shift().toLowerCase();
+  // Actualizar estadísticas del servidor cada 10 minutos
+  setInterval(() => {
+    updateServerStats(client, '1300875878481268820'); // Reemplaza con el ID de tu servidor
+  }, 10 * 60 * 1000);
 
-    if (!client.commands.has(commandName)) return;
-
-    try {
-        client.commands.get(commandName).execute(message);
-    } catch (error) {
-        console.error(error);
-        message.reply('Hubo un error al ejecutar ese comando.');
+  // Programar una tarea para enviar notificaciones periódicas
+  schedule.scheduleJob('0 * * * *', () => { // Cada hora
+    const channel = client.channels.cache.get('ID_DEL_CANAL_DE_VOZ');
+    if (channel) {
+      channel.join().then(connection => {
+        // Enviar notificación
+        console.log('Enviando notificación...');
+        // Aquí puedes agregar el código para enviar la notificación
+        connection.disconnect();
+      }).catch(console.error);
     }
+  });
 });
 
-// Evento para manejar interacciones con botones
-client.on('interactionCreate', async interaction => {
-    if (!interaction.isButton()) return;
+client.on('messageCreate', async message => {
+  if (message.author.bot) return;
 
-    try {
-        let role;
-        if (interaction.customId === 'saurodoma') {
-            role = interaction.guild.roles.cache.get('1305310749949693955');
-        } else if (interaction.customId === 'tevent') {
-            role = interaction.guild.roles.cache.get('1303767471014281218');
-        }
+  const args = message.content.slice(1).split(/ +/);
+  const commandName = args.shift().toLowerCase();
 
-        if (role) {
-            if (interaction.member.roles.cache.has(role.id)) {
-                // Si el usuario ya tiene el rol, se lo quita
-                await interaction.member.roles.remove(role);
-                await interaction.reply({ content: `El rol "${role.name}" ha sido eliminado.`, ephemeral: true });
-            } else {
-                // Si el usuario no tiene el rol, se lo añade
-                await interaction.member.roles.add(role);
-                await interaction.reply({ content: `El rol "${role.name}" ha sido añadido.`, ephemeral: true });
-            }
-        }
-    } catch (error) {
-        console.error(error);
-        await interaction.reply({ content: 'Hubo un error al procesar tu solicitud.', ephemeral: true });
-    }
+  if (!client.commands.has(commandName)) return;
+
+  const command = client.commands.get(commandName);
+
+  try {
+    command.execute(message);
+  } catch (error) {
+    console.error(error);
+    message.reply('Hubo un error al ejecutar ese comando!');
+  }
 });
+
+// Manejar errores y reconexiones
+client.on('error', console.error);
+client.on('disconnect', () => {
+  console.log('Bot desconectado, intentando reconectar...');
+  client.login(process.env.TOKEN);
+});
+client.on('reconnecting', () => {
+  console.log('Bot reconectando...');
+});
+
+// Mantener la conexión activa enviando un ping cada 30 minutos
+setInterval(() => {
+  client.ws.ping();
+  console.log('Ping enviado para mantener la conexión activa');
+}, 1800000); // 30 minutos
 
 // Usar el manejador de eventos de estado de voz
 handleVoiceStateUpdate(client);
@@ -113,15 +128,4 @@ events.forEach(event => {
     });
 });
 
-// Actualizar estadísticas del servidor al iniciar el bot
-client.once('ready', () => {
-    console.log(`Logged in as ${client.user.tag}!`);
-    updateServerStats(client, '1300875878481268820'); // Reemplaza con el ID de tu servidor
-
-    // Actualizar estadísticas del servidor cada 10 minutos
-    setInterval(() => {
-        updateServerStats(client, '1300875878481268820'); // Reemplaza con el ID de tu servidor
-    }, 10 * 60 * 1000);
-});
-
-client.login(process.env.DISCORD_TOKEN);
+client.login(process.env.TOKEN);
