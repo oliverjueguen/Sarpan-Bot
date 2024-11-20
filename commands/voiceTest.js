@@ -26,7 +26,7 @@ module.exports = {
           console.log('Recognized text:', text);
 
           // Manejar la respuesta y ejecutar comandos
-          if (text.toLowerCase().includes('funcionas sarpan bot')) {
+          if (text.toLowerCase().includes('funcionas')) {
             const textChannel = client.channels.cache.get('1308902912533069825');
             if (textChannel) {
               textChannel.send('Sí, te escucho.');
