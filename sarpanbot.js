@@ -4,6 +4,8 @@ const fs = require('fs');
 const path = require('path');
 const { scheduleNightNotifications } = require('./utils/scheduleNight'); // Asegúrate de que la ruta sea correcta
 const ScheduleManager = require('./utils/scheduleManager'); // Asegúrate de que la ruta sea correcta
+const handleVoiceStateUpdate = require('./voiceStateHandler'); // Asegúrate de que la ruta sea correcta
+const handleMessageDelete = require('./messageDeleteHandler'); // Asegúrate de que la ruta sea correcta
 
 dotenv.config();
 
@@ -48,6 +50,10 @@ client.once('ready', () => {
   const scheduleManager = new ScheduleManager(client, eventTextChannelId, voiceChannelId, eventRoleId);
   scheduleManager.scheduleMultipleNotifications(eventTimes, 'El evento está a punto de comenzar en 5 minutos');
 });
+
+// Registrar los handlers
+handleVoiceStateUpdate(client);
+handleMessageDelete(client);
 
 client.on('messageCreate', async message => {
   if (message.author.bot) return;
