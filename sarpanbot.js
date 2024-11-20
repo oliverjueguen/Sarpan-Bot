@@ -3,14 +3,7 @@ const dotenv = require('dotenv');
 const fs = require('fs');
 const path = require('path');
 const schedule = require('node-schedule');
-const { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus, VoiceConnectionStatus, EndBehaviorType } = require('@discordjs/voice');
-const { Wit } = require('node-wit');
-const { scheduleNightNotifications } = require('./utils/scheduleNight');
-const ScheduleManager = require('./utils/scheduleManager');
-const handleVoiceStateUpdate = require('./voiceStateHandler');
-const handleMessageDelete = require('./messageDeleteHandler');
-const playAudio = require('./playAudio');
-const updateServerStats = require('./utils/updateServerStats');
+const { joinVoiceChannel, EndBehaviorType } = require('@discordjs/voice');
 
 dotenv.config();
 
@@ -30,12 +23,6 @@ for (const file of commandFiles) {
 
 client.once('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
-  updateServerStats(client, '1300875878481268820'); // Reemplaza con el ID de tu servidor
-
-  // Actualizar estadísticas del servidor cada 10 minutos
-  setInterval(() => {
-    updateServerStats(client, '1300875878481268820'); // Reemplaza con el ID de tu servidor
-  }, 10 * 60 * 1000);
 
   // Programar una tarea para enviar notificaciones periódicas
   schedule.scheduleJob('0 * * * *', () => { // Cada hora
@@ -90,82 +77,4 @@ setInterval(() => {
   console.log('Ping enviado para mantener la conexión activa');
 }, 1800000); // 30 minutos
 
-// Usar el manejador de eventos de estado de voz
-handleVoiceStateUpdate(client);
-
-// Usar el manejador de eventos de eliminación de mensajes
-handleMessageDelete(client);
-
-// Definir la variable nextNightTime antes de usarla
-let nextNightTime;
-
-// Programar notificación de audio 5 minutos antes de las noches
-const textChannelId = '1305310810007928945'; // Reemplaza con el ID del canal de texto
-const voiceChannelId = '1300875878481268824'; // Reemplaza con el ID del canal de voz
-const roleId = '1305310749949693955'; // Reemplaza con el ID del rol
-
-nextNightTime = scheduleNightNotifications(client, textChannelId, voiceChannelId, roleId);
-
-// Uso de nextNightTime
-console.log(nextNightTime);
-
-// Programar notificación de audio 5 minutos antes de los eventos
-const baseDate = new Date('2024-11-18T03:00:00');
-const events = [
-    { name: 'Evento 1', date: new Date(baseDate.setHours(3)), voiceChannelId: '1300875878481268824' },
-    { name: 'Evento 2', date: new Date(baseDate.setHours(6)), voiceChannelId: '1300875878481268824' },
-    { name: 'Evento 3', date: new Date(baseDate.setHours(9)), voiceChannelId: '1300875878481268824' },
-    { name: 'Evento 4', date: new Date(baseDate.setHours(12)), voiceChannelId: '1300875878481268824' },
-    { name: 'Evento 5', date: new Date(baseDate.setHours(15)), voiceChannelId: '1300875878481268824' },
-    { name: 'Evento 6', date: new Date(baseDate.setHours(18)), voiceChannelId: '1300875878481268824' },
-    { name: 'Evento 7', date: new Date(baseDate.setHours(21)), voiceChannelId: '1300875878481268824' },
-    { name: 'Evento 8', date: new Date(baseDate.setHours(0)), voiceChannelId: '1300875878481268824' },
-];
-
-events.forEach(event => {
-    const notificationTime = new Date(event.date.getTime() - 5 * 60000); // 5 minutos antes del evento
-
-    schedule.scheduleJob(notificationTime, async () => {
-        console.log('Ejecutando notificación de evento');
-        try {
-            await playAudio(client, event.voiceChannelId, 'sounds/tevent.mp3');
-        } catch (error) {
-            console.error('Error al reproducir el audio del evento:', error);
-        }
-    });
-});
-
 client.login(process.env.DISCORD_TOKEN);
-
-// Función para manejar comandos de voz
-async function handleVoiceCommand(connection) {
-  const receiver = connection.receiver;
-  const audioPlayer = createAudioPlayer();
-
-  receiver.speaking.on('start', userId => {
-    const audioStream = receiver.subscribe(userId, {
-      end: {
-        behavior: EndBehaviorType.AfterSilence,
-        duration: 100,
-      },
-    });
-
-    const buffer = [];
-    audioStream.on('data', chunk => buffer.push(chunk));
-    audioStream.on('end', async () => {
-      const audioBuffer = Buffer.concat(buffer);
-      const response = await witClient.message(audioBuffer.toString('base64'), {});
-      console.log('Respuesta de Wit.ai:', response);
-
-      // Manejar la respuesta de Wit.ai y ejecutar comandos
-      if (response.intents.length > 0) {
-        const intent = response.intents[0].name;
-        if (intent === 'leave') {
-          // Ejecutar comando leave
-          const command = client.commands.get('leave');
-          if (command) command.execute({ guild: connection.channel.guild, reply: console.log });
-        }
-      }
-    });
-  });
-}

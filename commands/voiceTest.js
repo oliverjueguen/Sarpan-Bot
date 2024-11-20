@@ -1,5 +1,13 @@
 const { EndBehaviorType } = require('@discordjs/voice');
-const SpeechToText = require('speech-to-text');
+const { createWriteStream } = require('fs');
+const { pipeline } = require('stream');
+const { promisify } = require('util');
+const { exec } = require('child_process');
+const { SpeechClient } = require('@google-cloud/speech');
+
+const pipelineAsync = promisify(pipeline);
+
+const speechClient = new SpeechClient();
 
 module.exports = {
   name: 'voiceTest',
@@ -16,17 +24,38 @@ module.exports = {
         },
       });
 
-      const buffer = [];
-      audioStream.on('data', chunk => buffer.push(chunk));
+      const filePath = `./audio_${userId}.pcm`;
+      const writeStream = createWriteStream(filePath);
+
+      pipeline(audioStream, writeStream, (err) => {
+        if (err) {
+          console.error('Pipeline failed', err);
+        } else {
+          console.log('Pipeline succeeded');
+        }
+      });
+
       audioStream.on('end', async () => {
         console.log('Audio stream ended, processing...');
-        const audioBuffer = Buffer.concat(buffer);
         try {
-          const text = await SpeechToText.recognize(audioBuffer);
-          console.log('Recognized text:', text);
+          const [response] = await speechClient.recognize({
+            config: {
+              encoding: 'LINEAR16',
+              sampleRateHertz: 16000,
+              languageCode: 'en-US',
+            },
+            audio: {
+              content: filePath,
+            },
+          });
+
+          const transcription = response.results
+            .map(result => result.alternatives[0].transcript)
+            .join('\n');
+          console.log(`Transcription: ${transcription}`);
 
           // Manejar la respuesta y ejecutar comandos
-          if (text.toLowerCase().includes('funcionas')) {
+          if (transcription.toLowerCase().includes('funcionas sarpan bot')) {
             const textChannel = client.channels.cache.get('1308902912533069825');
             if (textChannel) {
               textChannel.send('Sí, te escucho.');
