@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 const fs = require('fs');
 const path = require('path');
 const { scheduleNightNotifications } = require('./utils/scheduleNight'); // Asegúrate de que la ruta sea correcta
+const ScheduleManager = require('./utils/scheduleManager'); // Asegúrate de que la ruta sea correcta
 
 dotenv.config();
 
@@ -24,11 +25,28 @@ client.once('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
 
   // Programar notificaciones de noche
-  const textChannelId = '1305310810007928945'; // Reemplaza con el ID real del canal de texto
-  const voiceChannelId = '1300875878481268824'; // Reemplaza con el ID real del canal de voz
-  const roleId = '1305310749949693955'; // Reemplaza con el ID real del rol
+  const nightTextChannelId = '1305310810007928945'; // ID del canal de texto para la noche
+  const voiceChannelId = '1300875878481268824'; // ID del canal de voz
+  const nightRoleId = '1305310749949693955'; // ID del rol para la noche
 
-  scheduleNightNotifications(client, textChannelId, voiceChannelId, roleId);
+  scheduleNightNotifications(client, nightTextChannelId, voiceChannelId, nightRoleId);
+
+  // Programar notificaciones de eventos
+  const eventTextChannelId = '1303767609904201769'; // ID del canal de texto para tevent
+  const eventRoleId = '1303767471014281218'; // ID del rol para tevent
+  const eventTimes = [
+    '03:00', // Reemplaza con las horas de los eventos
+    '06:00',
+    '09:00',
+    '12:00',
+    '15:00',
+    '18:00',
+    '21:00',
+    '00:00'
+  ];
+
+  const scheduleManager = new ScheduleManager(client, eventTextChannelId, voiceChannelId, eventRoleId);
+  scheduleManager.scheduleMultipleNotifications(eventTimes, 'El evento está a punto de comenzar en 5 minutos');
 });
 
 client.on('messageCreate', async message => {
