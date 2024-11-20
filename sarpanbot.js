@@ -34,11 +34,8 @@ client.once('ready', () => {
         adapterCreator: channel.guild.voiceAdapterCreator,
       });
 
-      // Ejecutar comandos de voz
-      const voiceCommand = client.commands.get('voiceTest');
-      if (voiceCommand) {
-        voiceCommand.execute(connection, client);
-      }
+      // Aquí puedes agregar el código para enviar la notificación
+      connection.disconnect();
     }
   });
 });
