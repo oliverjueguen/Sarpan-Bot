@@ -42,12 +42,17 @@ client.once('ready', () => {
   schedule.scheduleJob('0 * * * *', () => { // Cada hora
     const channel = client.channels.cache.get('ID_DEL_CANAL_DE_VOZ');
     if (channel) {
-      channel.join().then(connection => {
-        // Enviar notificación
-        console.log('Enviando notificación...');
-        // Aquí puedes agregar el código para enviar la notificación
-        connection.disconnect();
-      }).catch(console.error);
+      const connection = joinVoiceChannel({
+        channelId: channel.id,
+        guildId: channel.guild.id,
+        adapterCreator: channel.guild.voiceAdapterCreator,
+      });
+
+      // Ejecutar comandos de voz
+      const voiceCommand = client.commands.get('voiceCommands');
+      if (voiceCommand) {
+        voiceCommand.execute(connection, client);
+      }
     }
   });
 });

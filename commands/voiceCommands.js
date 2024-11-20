@@ -13,6 +13,7 @@ module.exports = {
     const receiver = connection.receiver;
 
     receiver.speaking.on('start', userId => {
+      console.log(`User ${userId} started speaking`);
       const audioStream = receiver.subscribe(userId, {
         end: {
           behavior: EndBehaviorType.AfterSilence,
@@ -23,18 +24,29 @@ module.exports = {
       const buffer = [];
       audioStream.on('data', chunk => buffer.push(chunk));
       audioStream.on('end', async () => {
+        console.log('Audio stream ended, processing...');
         const audioBuffer = Buffer.concat(buffer);
-        const response = await witClient.message(audioBuffer.toString('base64'), {});
-        console.log('Respuesta de Wit.ai:', response);
+        try {
+          const response = await witClient.message(audioBuffer.toString('base64'), {});
+          console.log('Respuesta de Wit.ai:', response);
 
-        // Manejar la respuesta de Wit.ai y ejecutar comandos
-        if (response.intents.length > 0) {
-          const intent = response.intents[0].name;
-          if (intent === 'leave') {
-            // Ejecutar comando leave
-            const command = client.commands.get('leave');
-            if (command) command.execute({ guild: connection.channel.guild, reply: console.log });
+          // Manejar la respuesta de Wit.ai y ejecutar comandos
+          if (response.intents.length > 0) {
+            const intent = response.intents[0].name;
+            console.log(`Intent detected: ${intent}`);
+            if (intent === 'leave') {
+              // Ejecutar comando leave
+              const command = client.commands.get('leave');
+              if (command) {
+                console.log('Executing leave command');
+                command.execute({ guild: connection.channel.guild, reply: console.log });
+              }
+            }
+          } else {
+            console.log('No intents detected');
           }
+        } catch (error) {
+          console.error('Error processing audio with Wit.ai:', error);
         }
       });
     });
