@@ -15,7 +15,6 @@ const updateServerStats = require('./utils/updateServerStats');
 dotenv.config();
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
-const witClient = new Wit({ accessToken: process.env.WIT_AI_TOKEN });
 
 client.commands = new Collection();
 
