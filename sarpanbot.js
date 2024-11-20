@@ -2,8 +2,7 @@ const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const dotenv = require('dotenv');
 const fs = require('fs');
 const path = require('path');
-const schedule = require('node-schedule');
-const { joinVoiceChannel, EndBehaviorType } = require('@discordjs/voice');
+const { scheduleNightNotifications } = require('./utils/scheduleNight'); // Asegúrate de que la ruta sea correcta
 
 dotenv.config();
 
@@ -24,20 +23,12 @@ for (const file of commandFiles) {
 client.once('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
 
-  // Programar una tarea para enviar notificaciones periódicas
-  schedule.scheduleJob('0 * * * *', () => { // Cada hora
-    const channel = client.channels.cache.get('ID_DEL_CANAL_DE_VOZ');
-    if (channel) {
-      const connection = joinVoiceChannel({
-        channelId: channel.id,
-        guildId: channel.guild.id,
-        adapterCreator: channel.guild.voiceAdapterCreator,
-      });
+  // Programar notificaciones de noche
+  const textChannelId = '1305310810007928945'; // Reemplaza con el ID real del canal de texto
+  const voiceChannelId = '1300875878481268824'; // Reemplaza con el ID real del canal de voz
+  const roleId = '1305310749949693955'; // Reemplaza con el ID real del rol
 
-      // Aquí puedes agregar el código para enviar la notificación
-      connection.disconnect();
-    }
-  });
+  scheduleNightNotifications(client, textChannelId, voiceChannelId, roleId);
 });
 
 client.on('messageCreate', async message => {

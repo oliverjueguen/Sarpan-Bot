@@ -38,7 +38,11 @@ function scheduleNightNotifications(client, textChannelId, voiceChannelId, roleI
         }
 
         // Reprogramar la siguiente notificación
-        scheduleNightNotifications(client, textChannelId, voiceChannelId, roleId);
+        try {
+            scheduleNightNotifications(client, textChannelId, voiceChannelId, roleId);
+        } catch (error) {
+            console.error('Error al reprogramar la notificación de noche:', error);
+        }
     });
 
     return nextNightTime;
