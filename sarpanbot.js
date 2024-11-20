@@ -35,14 +35,14 @@ client.once('ready', () => {
   const eventTextChannelId = '1303767609904201769'; // ID del canal de texto para tevent
   const eventRoleId = '1303767471014281218'; // ID del rol para tevent
   const eventTimes = [
-    '03:00', // Reemplaza con las horas de los eventos
+    '00:00', // Reemplaza con las horas de los eventos
+    '03:00',
     '06:00',
     '09:00',
     '12:00',
     '15:00',
     '18:00',
-    '21:00',
-    '00:00'
+    '21:00'
   ];
 
   const scheduleManager = new ScheduleManager(client, eventTextChannelId, voiceChannelId, eventRoleId);

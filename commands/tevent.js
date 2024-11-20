@@ -3,7 +3,7 @@ module.exports = {
     description: 'Muestra cuánto tiempo queda para el siguiente evento.',
     async execute(message) {
         // Horas de los eventos en formato 24 horas (HH:MM)
-        const eventTimes = ['03:00', '06:00', '09:00', '12:00', '15:00', '18:00', '21:00', '00:00'];
+        const eventTimes = ['00:00', '03:00', '06:00', '09:00', '12:00', '15:00', '18:00', '21:00'];
 
         // Obtener la hora actual en formato de 24 horas
         const now = new Date();
@@ -31,11 +31,11 @@ module.exports = {
         const eventDate = new Date();
         eventDate.setHours(nextEvent.hour, nextEvent.minute, 0, 0);
 
-        if (eventDate < now) {
+        if (eventDate <= now) {
             eventDate.setDate(now.getDate() + 1); // Mover al día siguiente si el evento ya pasó hoy
         }
 
-        const timeDifference = eventDate - now; // Diferencia en milisegundos
+        const timeDifference = eventDate.getTime() - now.getTime(); // Diferencia en milisegundos
         const minutesLeft = Math.floor((timeDifference / 1000) / 60);
         const hoursLeft = Math.floor(minutesLeft / 60);
         const remainingMinutes = minutesLeft % 60;
