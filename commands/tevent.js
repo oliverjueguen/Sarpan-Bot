@@ -1,7 +1,13 @@
+const { areNotificationsEnabled } = require('./notificationstl');
+
 module.exports = {
     name: 'tevent',
     description: 'Muestra cuánto tiempo queda para el siguiente evento.',
     async execute(message) {
+        if (!areNotificationsEnabled()) {
+            return message.reply('Las notificaciones están desactivadas.');
+        }
+
         // Horas de los eventos en formato 24 horas (HH:MM)
         const eventTimes = ['00:00', '03:00', '06:00', '09:00', '12:00', '15:00', '18:00', '21:00'];
 

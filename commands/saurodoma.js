@@ -1,7 +1,13 @@
+const { areNotificationsEnabled } = require('./notificationstl');
+
 module.exports = {
     name: 'saurodoma',
     description: 'Muestra cuánto tiempo queda para la siguiente noche en el juego.',
     execute(message) {
+        if (!areNotificationsEnabled()) {
+            return message.reply('Las notificaciones están desactivadas.');
+        }
+
         const startDate = new Date('2024-11-17T21:00:00'); // Primera noche a las 21:00 en la hora local de la máquina
         const nightDuration = 30 * 60 * 1000; // 30 minutos en milisegundos
         const dayDuration = 2 * 60 * 60 * 1000; // 2 horas en milisegundos
