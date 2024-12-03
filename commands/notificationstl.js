@@ -13,6 +13,12 @@ module.exports = {
         notificationsEnabled = !notificationsEnabled;
         const status = notificationsEnabled ? 'activadas' : 'desactivadas';
         message.reply(`Las notificaciones han sido ${status}.`);
+
+        if (notificationsEnabled) {
+            console.log('Se han activado las notificaciones de Throne and Liberty');
+        } else {
+            console.log('Se han desactivado las notificaciones de Throne and Liberty');
+        }
     },
     areNotificationsEnabled() {
         return notificationsEnabled;
