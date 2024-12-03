@@ -1,6 +1,7 @@
 const schedule = require('node-schedule');
 const { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus } = require('@discordjs/voice');
 const path = require('path');
+const { areNotificationsEnabled } = require('../commands/notificationstl');
 
 class ScheduleManager {
     constructor(client, textChannelId, voiceChannelId, roleId) {
@@ -22,6 +23,12 @@ class ScheduleManager {
         console.log(`Notificación programada para: ${notificationTime}`); // Log para mostrar cuándo está programado el próximo evento
 
         schedule.scheduleJob(notificationTime, async () => {
+            if (!areNotificationsEnabled()) {
+                console.log('Las notificaciones están desactivadas. No se enviará ninguna notificación.');
+                return;
+            }
+
+            console.log(`Enviando notificación para el evento a las ${time}`);
             const channel = this.client.channels.cache.get(this.textChannelId);
             if (channel && channel.isTextBased()) {
                 channel.send(message);

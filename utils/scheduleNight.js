@@ -1,5 +1,6 @@
 const schedule = require('node-schedule');
 const playAudio = require('../playAudio'); // Asegúrate de que la ruta sea correcta
+const { areNotificationsEnabled } = require('../commands/notificationstl');
 
 function scheduleNightNotifications(client, textChannelId, voiceChannelId, roleId) {
     const startDate = new Date('2024-11-17T21:00:00'); // Primera noche a las 21:00 en la hora de la máquina
@@ -22,6 +23,11 @@ function scheduleNightNotifications(client, textChannelId, voiceChannelId, roleI
     console.log(`Notificación programada para: ${notificationTime}`);
 
     schedule.scheduleJob(notificationTime, async () => {
+        if (!areNotificationsEnabled()) {
+            console.log('Las notificaciones están desactivadas. No se enviará ninguna notificación.');
+            return;
+        }
+
         console.log('Ejecutando notificación de noche');
         const textChannel = client.channels.cache.get(textChannelId);
         if (textChannel) {
