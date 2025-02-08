@@ -83,10 +83,10 @@ client.on('reconnecting', () => {
   console.log('Bot reconectando...');
 });
 
-// Mantener la conexión activa enviando un ping cada 30 minutos
+// Mantener la conexión activa registrando un mensaje en la consola cada 30 minutos
 setInterval(() => {
-  client.ws.ping();
-  console.log('Ping enviado para mantener la conexión activa');
+  console.log('Heartbeat enviado para mantener la conexión activa');
 }, 1800000); // 30 minutos
+
 
 client.login(process.env.DISCORD_TOKEN);
