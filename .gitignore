@@ -68,37 +68,3 @@ requirements.txt
 # Archivos específicos del proyecto
 sarpan.tar.gz
 sarpan.tar
-
-# Otros archivos grandes
-*.zip
-*.tar
-*.tar.gz
-*.rar
-*.7z
-*.iso
-*.img
-*.bin
-*.exe
-*.dll
-*.so
-*.dmg
-*.pkg
-*.deb
-*.rpm
-*.msi
-*.mp4
-*.mkv
-*.avi
-*.mov
-*.mp3
-*.wav
-*.flac
-*.aac
-*.ogg
-*.pdf
-*.doc
-*.docx
-*.xls
-*.xlsx
-*.ppt
-*.pptx
