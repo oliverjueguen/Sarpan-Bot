@@ -40,21 +40,21 @@ It automates **event notifications**, **in-game cycle alerts**, **voice channel 
 
 ```mermaid
 flowchart TD
-    D[Discord Gateway] --> C[Discord Client (discord.js)]
+    D[Discord Gateway] --> C[Discord Client]
 
-    C --> CMD[Command Handler<br/>/commands/*.js]
-    C --> EVT[Event Handlers<br/>ready, voiceStateUpdate, messageDelete]
-    C --> SCH[Schedule Manager<br/>node-schedule]
-    C --> UTIL[Utils<br/>scheduleNight, updateServerStats]
-    C --> VOICE[Voice Audio Player<br/>@discordjs/voice]
+    C --> CMD[Command Handler]
+    C --> EVT[Event Handlers]
+    C --> SCH[Schedule Manager]
+    C --> UTIL[Utility Modules]
+    C --> VOICE[Voice Audio Player]
 
     SCH --> VOICE
     SCH --> D
 
-    EVT --> LOG[Admin Logs Channel]
+    EVT --> LOG[Admin Logs]
 
     subgraph Webhook Server
-      W[Express /payload] --> GP[git pull & restart flow]
+        W[Express /payload] --> GP[git pull and restart]
     end
 ```
 
